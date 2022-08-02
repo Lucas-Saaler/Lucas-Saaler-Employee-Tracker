@@ -40,6 +40,9 @@ function menu(){
     else if (response.menu==="add a department"){
         addDepartment()
     }
+    else if(response.menu==="add a role"){
+        addRole()
+    }
 
   })
     
@@ -59,7 +62,7 @@ function viewRoles(){
 }
 
 function addDepartment(){
-    const departmentQuestions =[
+    const departmentQuestions = [
         {
             type:"input",
             name:"department_name",
@@ -74,6 +77,36 @@ function addDepartment(){
     })
    }
 
+function addRole(){
+    db.query("select name as name, id as value from department", (er, departmentData) => {
+        const roleQuestions = [
+            {
+                type:"input",
+                name:"role_title",
+                message:"What is this role's title?"
+            },
+            {
+                type:"input",
+                name:"role_salary",
+                message:"What is this role's salary?"
+            },
+            {
+                type:"list",
+                name:"department_id",
+                message:"Which of the following departments does this role belong to?",
+                choices:departmentData
+
+            }
+        ]
+    inquirer.prompt(roleQuestions).then(response=>{
+        const parameters=[response.role_title,response.role_salary,response.department_id]
+        db.query("INSERT INTO role (title, salary, department_id)VALUES(?,?,?)",parameters,(err, data)=>{
+
+            viewRoles()
+        })
+    })
+})
+}
 
 function addEmployees(){
     db.query("select title as name, id as value from role", (er, roleData)=>{
