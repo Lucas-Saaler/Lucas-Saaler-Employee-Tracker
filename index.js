@@ -5,10 +5,7 @@ require("console.table")
 db.connect( ()=>{
     menu()
 })
-/*
-view all departments, view all roles, view all employees, add a department, add a role, add an employee, and update an employee role
 
-*/ 
 const menuQuestion=[
     {
         type:"list",
@@ -42,6 +39,9 @@ function menu(){
     }
     else if(response.menu==="add a role"){
         addRole()
+    }
+    else if(response.menu==="update an employee role"){
+        updateEmployee()
     }
 
   })
@@ -148,6 +148,36 @@ function addEmployees(){
            })
     })
 }
+
+function updateEmployee(){
+    db.query("select * from employee", (err, employeeData) => {
+        db.query(`select CONCAT(first_name, " " , last_name) as name, id as value from employee`, (err, nameData)=>{
+            db.query("select title as name, id as value from role", (er, roleData)=>{
+            const updateQuestions = [
+                {
+                    type:"list",
+                    name:"to_update",
+                    message:"Choose the following employee to update the role of:",
+                    choices:nameData
+                },
+                {
+                    type:"list",
+                    name:"new_role",
+                    message:"Please pick a new role from the following:",
+                    choices:roleData
+                }
+            ]
+            inquirer.prompt(updateQuestions).then(response=>{
+                const parameters=response.new_role
+                db.query(`UPDATE employee SET role_id=(?) WHERE id=${response.to_update};`,parameters,(err, data)=>{
+                    viewEmployees()
+                })
+            })
+        }) 
+    })
+})
+}
+
 function viewEmployees(){
 db.query(`
 SELECT 
